@@ -73,6 +73,13 @@ cp .env.example .env.oi
 # 编辑 .env.oi，填入你的 TG_BOT_TOKEN 和 TG_CHAT_ID
 ```
 
+也可以直接用环境变量，不创建 `.env.oi`：
+
+```bash
+export TG_BOT_TOKEN=your_telegram_bot_token
+export TG_CHAT_ID=your_telegram_chat_id
+```
+
 ### 创建 Telegram Bot
 1. 找 [@BotFather](https://t.me/BotFather)，发 `/newbot`
 2. 获得 Bot Token
@@ -100,6 +107,26 @@ python3 accumulation_radar.py full
 # 每小时:30扫描OI异动+三策略评分
 30 * * * *  cd /path/to/accumulation-radar && python3 accumulation_radar.py oi >> accumulation_oi.log 2>&1
 ```
+
+## GitHub Actions 部署
+
+如果你不想依赖本机开机，可以直接部署到 GitHub Actions。仓库里已经包含
+`.github/workflows/accumulation-radar.yml`。
+
+### 需要配置的 GitHub Secrets
+
+- `TG_BOT_TOKEN`
+- `TG_CHAT_ID`
+
+### 默认调度
+
+- `0 2 * * *`：每天 `10:00`（Asia/Shanghai）运行 `pool`
+- `30 * * * *`：每小时 `:30` 运行 `oi`
+
+### 为什么需要缓存数据库
+
+`oi` 模式依赖本地 `accumulation.db` 里的收筹池。GitHub Actions 每次运行都是临时环境，
+所以工作流会自动恢复和保存 `accumulation.db`，让后续任务能接着上一轮继续跑。
 
 ## 推送示例
 

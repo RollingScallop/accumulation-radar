@@ -1,0 +1,84 @@
+name: Accumulation Radar
+
+on:
+  schedule:
+    # 10:00 Asia/Shanghai
+    - cron: "0 2 * * *"
+    # Every hour at :30 Asia/Shanghai / UTC
+    - cron: "30 * * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Mode to run"
+        required: true
+        default: "oi"
+        type: choice
+        options:
+          - oi
+          - pool
+          - full
+
+permissions:
+  contents: read
+
+concurrency:
+  group: accumulation-radar-${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  run-radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+      TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Restore database cache
+        id: restore-db
+        uses: actions/cache/restore@v4
+        with:
+          path: accumulation.db
+          key: accumulation-db-${{ github.run_id }}
+          restore-keys: |
+            accumulation-db-
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+
+      - name: Select mode
+        id: select-mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ github.event.inputs.mode }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "0 2 * * *" ]; then
+            echo "mode=pool" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=oi" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upgrade mode when database is missing
+        id: effective-mode
+        run: |
+          mode="${{ steps.select-mode.outputs.mode }}"
+          if [ "$mode" = "oi" ] && [ ! -f accumulation.db ]; then
+            mode="full"
+          fi
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+
+      - name: Run accumulation radar
+        run: python accumulation_radar.py "${{ steps.effective-mode.outputs.mode }}"
+
+      - name: Save database cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: accumulation.db
+          key: accumulation-db-${{ github.run_id }}

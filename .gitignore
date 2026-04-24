@@ -4,3 +4,6 @@ accumulation.db
 *.pyc
 __pycache__/
 *.log
+.venv/
+.DS_Store
+.github-cache/

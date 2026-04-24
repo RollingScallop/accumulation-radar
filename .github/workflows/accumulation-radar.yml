@@ -108,19 +108,7 @@ jobs:
             if [ ! -f accumulation.db ]; then
               mode="full"
             else
-              rows=$(python -c 'import sqlite3
-try:
-    conn = sqlite3.connect("accumulation.db")
-    cur = conn.cursor()
-    cur.execute("select count(*) from sqlite_master where type=\"table\" and name=\"watchlist\"")
-    has_table = cur.fetchone()[0]
-    if not has_table:
-        print(0)
-    else:
-        cur.execute("select count(*) from watchlist where status != \"removed\"")
-        print(cur.fetchone()[0])
-except Exception:
-    print(0)')
+              rows=$(python -c 'import sqlite3; conn = sqlite3.connect("accumulation.db"); cur = conn.cursor(); cur.execute("select count(*) from sqlite_master where type=\"table\" and name=\"watchlist\""); has_table = cur.fetchone()[0]; print(0 if not has_table else cur.execute("select count(*) from watchlist where status != \"removed\"").fetchone()[0])' 2>/dev/null || echo 0)
               if [ "${rows:-0}" -eq 0 ]; then
                 mode="full"
               fi

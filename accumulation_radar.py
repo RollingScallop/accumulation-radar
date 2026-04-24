@@ -336,6 +336,25 @@ def format_usd(v):
     return f"${v:.0f}"
 
 
+def _post_telegram_message(url, payload, label, attempts=3):
+    """发送单条TG消息，带重试"""
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            resp = requests.post(url, json=payload, timeout=15)
+            if resp.status_code == 200:
+                return True, f"[TG] {label} ✓"
+            last_error = f"status={resp.status_code} body={resp.text[:200]}"
+        except Exception as e:
+            last_error = str(e)
+
+        if attempt < attempts:
+            print(f"[TG] {label} retry {attempt}/{attempts - 1}: {last_error}")
+            time.sleep(min(2 * attempt, 5))
+
+    return False, f"[TG] {label} ✗ {last_error}"
+
+
 def build_pool_report(results, top_n=25):
     """生成收筹标的池报告"""
     if not results:
@@ -460,23 +479,19 @@ def send_telegram(text):
         chunks.append(current)
     
     for chunk in chunks:
-        try:
-            resp = requests.post(url, json={
+        ok, msg = _post_telegram_message(url, {
+            "chat_id": TG_CHAT_ID,
+            "text": chunk,
+            "parse_mode": "Markdown"
+        }, f"Sent ({len(chunk)} chars)")
+        print(msg)
+
+        if not ok:
+            ok_plain, msg_plain = _post_telegram_message(url, {
                 "chat_id": TG_CHAT_ID,
-                "text": chunk,
-                "parse_mode": "Markdown"
-            }, timeout=10)
-            if resp.status_code == 200:
-                print(f"[TG] Sent ✓ ({len(chunk)} chars)")
-            else:
-                # Markdown失败就用纯文本
-                resp2 = requests.post(url, json={
-                    "chat_id": TG_CHAT_ID,
-                    "text": chunk.replace("*", "").replace("_", ""),
-                }, timeout=10)
-                print(f"[TG] Sent plain ({'✓' if resp2.status_code == 200 else '✗'})")
-        except Exception as e:
-            print(f"[TG] Error: {e}")
+                "text": chunk.replace("*", "").replace("_", ""),
+            }, f"Sent plain ({len(chunk)} chars)")
+            print(msg_plain)
         time.sleep(0.5)
 
 

@@ -33,6 +33,7 @@ jobs:
       TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
       TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
       MIHOMO_VERSION: v1.19.23
+      PROXY_URL: http://127.0.0.1:7897
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -61,33 +62,55 @@ jobs:
           chmod +x mihomo
           mkdir -p .github-cache
           printf '%s' "${{ secrets.CLASH_CONFIG_B64 }}" | base64 -d > .github-cache/mihomo.yaml
+          rm -f .github-cache/mihomo.log
           nohup ./mihomo -f .github-cache/mihomo.yaml > .github-cache/mihomo.log 2>&1 &
-          for _ in $(seq 1 20); do
-            if curl -sS --proxy http://127.0.0.1:7897 https://www.gstatic.com/generate_204 >/dev/null; then
+          for _ in $(seq 1 30); do
+            if curl -sS --proxy "${PROXY_URL}" https://www.gstatic.com/generate_204 >/dev/null; then
               break
             fi
             sleep 1
           done
-          echo "HTTPS_PROXY=http://127.0.0.1:7897" >> "$GITHUB_ENV"
-          echo "HTTP_PROXY=http://127.0.0.1:7897" >> "$GITHUB_ENV"
-          echo "ALL_PROXY=http://127.0.0.1:7897" >> "$GITHUB_ENV"
+          echo "HTTPS_PROXY=${PROXY_URL}" >> "$GITHUB_ENV"
+          echo "HTTP_PROXY=${PROXY_URL}" >> "$GITHUB_ENV"
+          echo "ALL_PROXY=${PROXY_URL}" >> "$GITHUB_ENV"
 
-      - name: Verify upstream access through proxy
+      - name: Verify upstream access through proxy with retries
         run: |
-          curl -fsS --proxy http://127.0.0.1:7897 "https://api.telegram.org/bot${TG_BOT_TOKEN}/getMe" >/tmp/tg.json
-          curl -fsS --proxy http://127.0.0.1:7897 "https://fapi.binance.com/fapi/v1/exchangeInfo" >/tmp/exchange.json
-          python - <<'PY'
-          import json
-          with open('/tmp/tg.json') as f:
-              tg = json.load(f)
-          with open('/tmp/exchange.json') as f:
-              ex = json.load(f)
-          assert tg.get('ok') is True, tg
-          symbols = ex.get('symbols', [])
-          assert len(symbols) > 0, ex
-          print(f"telegram_ok={tg['result']['username']}")
-          print(f"binance_symbols={len(symbols)}")
-          PY
+          verify_upstream() {
+            curl -fsS --proxy "${PROXY_URL}" "https://api.telegram.org/bot${TG_BOT_TOKEN}/getMe" >/tmp/tg.json
+            curl -fsS --proxy "${PROXY_URL}" "https://fapi.binance.com/fapi/v1/exchangeInfo" >/tmp/exchange.json
+            python - <<'PY'
+            import json
+            with open('/tmp/tg.json') as f:
+                tg = json.load(f)
+            with open('/tmp/exchange.json') as f:
+                ex = json.load(f)
+            assert tg.get('ok') is True, tg
+            symbols = ex.get('symbols', [])
+            assert len(symbols) > 0, ex
+            print(f"telegram_ok={tg['result']['username']}")
+            print(f"binance_symbols={len(symbols)}")
+            PY
+          }
+
+          for attempt in $(seq 1 4); do
+            echo "Proxy verification attempt ${attempt}/4"
+            if verify_upstream; then
+              exit 0
+            fi
+
+            if [ "${attempt}" -lt 4 ]; then
+              echo "Proxy verification failed, restarting Mihomo to force node failover..."
+              pkill -f "/mihomo -f .github-cache/mihomo.yaml" || true
+              sleep 2
+              nohup ./mihomo -f .github-cache/mihomo.yaml > .github-cache/mihomo.log 2>&1 &
+              sleep $((attempt * 3))
+            fi
+          done
+
+          echo "Mihomo log tail:"
+          tail -n 80 .github-cache/mihomo.log || true
+          exit 1
 
       - name: Select mode
         id: select-mode

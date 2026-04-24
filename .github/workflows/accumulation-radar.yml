@@ -32,6 +32,7 @@ jobs:
     env:
       TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
       TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+      MIHOMO_VERSION: v1.19.23
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,6 +53,41 @@ jobs:
 
       - name: Install dependencies
         run: python -m pip install --upgrade pip && pip install -r requirements.txt
+
+      - name: Start Mihomo proxy
+        run: |
+          curl -fsSL -o mihomo.gz "https://github.com/MetaCubeX/mihomo/releases/download/${MIHOMO_VERSION}/mihomo-linux-amd64-${MIHOMO_VERSION}.gz"
+          gunzip -c mihomo.gz > mihomo
+          chmod +x mihomo
+          mkdir -p .github-cache
+          printf '%s' "${{ secrets.CLASH_CONFIG_B64 }}" | base64 -d > .github-cache/mihomo.yaml
+          nohup ./mihomo -f .github-cache/mihomo.yaml > .github-cache/mihomo.log 2>&1 &
+          for _ in $(seq 1 20); do
+            if curl -sS --proxy http://127.0.0.1:7897 https://www.gstatic.com/generate_204 >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          echo "HTTPS_PROXY=http://127.0.0.1:7897" >> "$GITHUB_ENV"
+          echo "HTTP_PROXY=http://127.0.0.1:7897" >> "$GITHUB_ENV"
+          echo "ALL_PROXY=http://127.0.0.1:7897" >> "$GITHUB_ENV"
+
+      - name: Verify upstream access through proxy
+        run: |
+          curl -fsS --proxy http://127.0.0.1:7897 "https://api.telegram.org/bot${TG_BOT_TOKEN}/getMe" >/tmp/tg.json
+          curl -fsS --proxy http://127.0.0.1:7897 "https://fapi.binance.com/fapi/v1/exchangeInfo" >/tmp/exchange.json
+          python - <<'PY'
+          import json
+          with open('/tmp/tg.json') as f:
+              tg = json.load(f)
+          with open('/tmp/exchange.json') as f:
+              ex = json.load(f)
+          assert tg.get('ok') is True, tg
+          symbols = ex.get('symbols', [])
+          assert len(symbols) > 0, ex
+          print(f"telegram_ok={tg['result']['username']}")
+          print(f"binance_symbols={len(symbols)}")
+          PY
 
       - name: Select mode
         id: select-mode

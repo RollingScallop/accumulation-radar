@@ -79,18 +79,7 @@ jobs:
           verify_upstream() {
             curl -fsS --proxy "${PROXY_URL}" "https://api.telegram.org/bot${TG_BOT_TOKEN}/getMe" >/tmp/tg.json
             curl -fsS --proxy "${PROXY_URL}" "https://fapi.binance.com/fapi/v1/exchangeInfo" >/tmp/exchange.json
-            python - <<'PY'
-            import json
-            with open('/tmp/tg.json') as f:
-                tg = json.load(f)
-            with open('/tmp/exchange.json') as f:
-                ex = json.load(f)
-            assert tg.get('ok') is True, tg
-            symbols = ex.get('symbols', [])
-            assert len(symbols) > 0, ex
-            print(f"telegram_ok={tg['result']['username']}")
-            print(f"binance_symbols={len(symbols)}")
-            PY
+            python -c 'import json; tg=json.load(open("/tmp/tg.json")); ex=json.load(open("/tmp/exchange.json")); assert tg.get("ok") is True, tg; symbols=ex.get("symbols", []); assert len(symbols) > 0, ex; print(f"telegram_ok={tg[\"result\"][\"username\"]}"); print(f"binance_symbols={len(symbols)}")'
           }
 
           for attempt in $(seq 1 4); do

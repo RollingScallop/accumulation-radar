@@ -4,8 +4,10 @@ on:
   schedule:
     # 10:00 Asia/Shanghai
     - cron: "0 2 * * *"
-    # Every hour at :05 and :35
-    - cron: "5,35 * * * *"
+    # Every hour at :17
+    - cron: "17 * * * *"
+    # Every hour at :47
+    - cron: "47 * * * *"
   workflow_dispatch:
     inputs:
       mode:

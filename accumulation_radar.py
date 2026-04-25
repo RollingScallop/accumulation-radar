@@ -337,8 +337,10 @@ def format_usd(v):
 
 
 def format_price(v):
-    """统一保留两位小数"""
-    return f"${v:.2f}"
+    """统一显示三位有效数字（0除外）"""
+    if v == 0:
+        return "$0.00"
+    return f"${v:.3g}"
 
 
 def _post_telegram_message(url, payload, label, attempts=3):

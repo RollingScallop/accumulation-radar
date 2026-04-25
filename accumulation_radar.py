@@ -751,6 +751,7 @@ def main():
             coin_data[sym] = {
                 "coin": coin, "sym": sym,
                 "px_chg": tk["px_chg"], "vol": tk["vol"],
+                "price": tk["price"],
                 "fr_pct": fr_pct, "d6h": d6h,
                 "oi_usd": oi_usd, "est_mcap": est_mcap,
                 "sw_days": sw_days, "pool_sc": pool_sc,
@@ -906,6 +907,7 @@ def main():
             for s in chase[:8]:
                 lines.append(
                     f"  {s['coin']:<7} 费率{s['fr_pct']:+.3f}% {s['trend']}"
+                    f" | 现价{format_price(s['price'])}"
                     f" | 涨{s['px_chg']:+.0f}% | ~{mcap_str(s['est_mcap'])}"
                 )
         else:
@@ -919,6 +921,7 @@ def main():
             if s["m_sc"] >= 12: dims.append(f"💎{mcap_str(s['est_mcap'])}")
             if s["s_sc"] >= 10: dims.append(f"💤{s['sw_days']}天")
             if s["o_sc"] >= 10: dims.append(f"⚡OI{s['d6h']:+.0f}%")
+            dims.append(f"💰{format_price(s['price'])}")
             lines.append(
                 f"  {s['coin']:<7} {s['total']}分 | {' '.join(dims)}"
             )
@@ -926,7 +929,7 @@ def main():
         # 表3: 埋伏
         lines.append(f"\n🎯 **埋伏** (市值35+OI30+横盘20+费率15)")
         for s in ambush[:8]:
-            tags = [f"~{mcap_str(s['est_mcap'])}"]
+            tags = [f"现价{format_price(s['price'])}", f"~{mcap_str(s['est_mcap'])}"]
             if abs(s["d6h"]) >= 2: tags.append(f"OI{s['d6h']:+.0f}%")
             if s["d6h"] > 2 and abs(s["px_chg"]) < 5: tags.append("🎯暗流")
             if s["sw_days"] >= 45: tags.append(f"横盘{s['sw_days']}天")

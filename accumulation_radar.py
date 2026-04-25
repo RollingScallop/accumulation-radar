@@ -337,14 +337,8 @@ def format_usd(v):
 
 
 def format_price(v):
-    """按价格区间自适应显示精度"""
-    if v >= 1000:
-        return f"${v:,.2f}"
-    if v >= 1:
-        return f"${v:.4f}"
-    if v >= 0.01:
-        return f"${v:.6f}"
-    return f"${v:.8f}"
+    """统一保留两位小数"""
+    return f"${v:.2f}"
 
 
 def _post_telegram_message(url, payload, label, attempts=3):
@@ -407,8 +401,8 @@ def build_pool_report(results, top_n=25):
             lines.append(
                 f"  ⚡ {r['coin']} | 分:{r['score']:.0f} | "
                 f"横盘{r['sideways_days']}天 | 波动{r['range_pct']:.0f}% | "
-                f"现价{format_price(r['current_price'])} | "
-                f"Vol{r['vol_breakout']:.1f}x"
+                f"Vol{r['vol_breakout']:.1f}x | "
+                f"现价：{format_price(r['current_price'])}"
             )
         lines.append("")
     
@@ -418,8 +412,8 @@ def build_pool_report(results, top_n=25):
             lines.append(
                 f"  💤 {r['coin']} | 分:{r['score']:.0f} | "
                 f"横盘{r['sideways_days']}天 | 波动{r['range_pct']:.0f}% | "
-                f"现价{format_price(r['current_price'])} | "
-                f"日均Vol {format_usd(r['avg_vol'])}"
+                f"日均Vol {format_usd(r['avg_vol'])} | "
+                f"现价：{format_price(r['current_price'])}"
             )
     
     return "\n".join(lines)
@@ -450,7 +444,7 @@ def build_oi_alert_report(alerts, watchlist_coins):
             lines.append(
                 f"  {emoji} **{a['coin']}** | OI: {a['oi_delta_pct']:+.1f}% "
                 f"({format_usd(a['oi_usd'])}) | "
-                f"现价: {format_price(a['price'])} | 24h: {a['px_chg_pct']:+.1f}%"
+                f"24h: {a['px_chg_pct']:+.1f}% | 现价：{format_price(a['price'])}"
             )
             # 信号解读
             if a["oi_delta_pct"] > 0 and abs(a["px_chg_pct"]) < 3:
@@ -465,7 +459,7 @@ def build_oi_alert_report(alerts, watchlist_coins):
             emoji = "🟢" if a["oi_delta_pct"] > 0 else "🔴"
             lines.append(
                 f"  {emoji} {a['coin']} | OI: {a['oi_delta_pct']:+.1f}% | "
-                f"现价: {format_price(a['price'])} | 24h: {a['px_chg_pct']:+.1f}%"
+                f"24h: {a['px_chg_pct']:+.1f}% | 现价：{format_price(a['price'])}"
             )
     
     return "\n".join(lines)
@@ -605,8 +599,8 @@ def build_fuel_report(fuel_targets, squeeze_targets):
             flag = "🎯极度!" if fr_pct < -0.1 else "⚠️"
             lines.append(
                 f"  {flag} **{t['coin']}** | 涨{t['px_chg']:+.1f}% | "
-                f"现价{format_price(t['price'])} | "
-                f"费率🧊{fr_pct:.4f}% | Vol {format_usd(t['vol'])}"
+                f"费率🧊{fr_pct:.4f}% | Vol {format_usd(t['vol'])} | "
+                f"现价：{format_price(t['price'])}"
             )
         lines.append("")
     
@@ -615,9 +609,9 @@ def build_fuel_report(fuel_targets, squeeze_targets):
         for t in squeeze_targets[:8]:
             fr_pct = t["funding"] * 100
             lines.append(
-                f"  🧊 {t['coin']} | 现价{format_price(t['price'])} | "
-                f"24h{t['px_chg']:+.1f}% | "
-                f"费率{fr_pct:.4f}% | Vol {format_usd(t['vol'])}"
+                f"  🧊 {t['coin']} | 24h{t['px_chg']:+.1f}% | "
+                f"费率{fr_pct:.4f}% | Vol {format_usd(t['vol'])} | "
+                f"现价：{format_price(t['price'])}"
             )
     
     return "\n".join(lines)
@@ -907,8 +901,8 @@ def main():
             for s in chase[:8]:
                 lines.append(
                     f"  {s['coin']:<7} 费率{s['fr_pct']:+.3f}% {s['trend']}"
-                    f" | 现价{format_price(s['price'])}"
                     f" | 涨{s['px_chg']:+.0f}% | ~{mcap_str(s['est_mcap'])}"
+                    f" | 现价：{format_price(s['price'])}"
                 )
         else:
             lines.append("  暂无（需涨>3%+费率负）")
@@ -921,7 +915,7 @@ def main():
             if s["m_sc"] >= 12: dims.append(f"💎{mcap_str(s['est_mcap'])}")
             if s["s_sc"] >= 10: dims.append(f"💤{s['sw_days']}天")
             if s["o_sc"] >= 10: dims.append(f"⚡OI{s['d6h']:+.0f}%")
-            dims.append(f"💰{format_price(s['price'])}")
+            dims.append(f"现价：{format_price(s['price'])}")
             lines.append(
                 f"  {s['coin']:<7} {s['total']}分 | {' '.join(dims)}"
             )
@@ -929,11 +923,12 @@ def main():
         # 表3: 埋伏
         lines.append(f"\n🎯 **埋伏** (市值35+OI30+横盘20+费率15)")
         for s in ambush[:8]:
-            tags = [f"现价{format_price(s['price'])}", f"~{mcap_str(s['est_mcap'])}"]
+            tags = [f"~{mcap_str(s['est_mcap'])}"]
             if abs(s["d6h"]) >= 2: tags.append(f"OI{s['d6h']:+.0f}%")
             if s["d6h"] > 2 and abs(s["px_chg"]) < 5: tags.append("🎯暗流")
             if s["sw_days"] >= 45: tags.append(f"横盘{s['sw_days']}天")
             if s["fr_pct"] < -0.01: tags.append(f"费率{s['fr_pct']:.2f}%")
+            tags.append(f"现价：{format_price(s['price'])}")
             lines.append(
                 f"  {s['coin']:<7} {s['total']}分 | {' '.join(tags)}"
             )

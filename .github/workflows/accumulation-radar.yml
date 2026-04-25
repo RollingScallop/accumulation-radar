@@ -57,7 +57,8 @@ jobs:
 
       - name: Start Mihomo proxy
         run: |
-          curl -fsSL -o mihomo.gz "https://github.com/MetaCubeX/mihomo/releases/download/${MIHOMO_VERSION}/mihomo-linux-amd64-${MIHOMO_VERSION}.gz"
+          env -u HTTPS_PROXY -u HTTP_PROXY -u ALL_PROXY \
+            curl --noproxy '*' -fsSL -o mihomo.gz "https://github.com/MetaCubeX/mihomo/releases/download/${MIHOMO_VERSION}/mihomo-linux-amd64-${MIHOMO_VERSION}.gz"
           gunzip -c mihomo.gz > mihomo
           chmod +x mihomo
           mkdir -p .github-cache

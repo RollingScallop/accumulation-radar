@@ -336,6 +336,17 @@ def format_usd(v):
     return f"${v:.0f}"
 
 
+def format_price(v):
+    """按价格区间自适应显示精度"""
+    if v >= 1000:
+        return f"${v:,.2f}"
+    if v >= 1:
+        return f"${v:.4f}"
+    if v >= 0.01:
+        return f"${v:.6f}"
+    return f"${v:.8f}"
+
+
 def _post_telegram_message(url, payload, label, attempts=3):
     """发送单条TG消息，带重试"""
     last_error = None
@@ -396,6 +407,7 @@ def build_pool_report(results, top_n=25):
             lines.append(
                 f"  ⚡ {r['coin']} | 分:{r['score']:.0f} | "
                 f"横盘{r['sideways_days']}天 | 波动{r['range_pct']:.0f}% | "
+                f"现价{format_price(r['current_price'])} | "
                 f"Vol{r['vol_breakout']:.1f}x"
             )
         lines.append("")
@@ -406,6 +418,7 @@ def build_pool_report(results, top_n=25):
             lines.append(
                 f"  💤 {r['coin']} | 分:{r['score']:.0f} | "
                 f"横盘{r['sideways_days']}天 | 波动{r['range_pct']:.0f}% | "
+                f"现价{format_price(r['current_price'])} | "
                 f"日均Vol {format_usd(r['avg_vol'])}"
             )
     
@@ -436,7 +449,8 @@ def build_oi_alert_report(alerts, watchlist_coins):
             emoji = "🟢" if a["oi_delta_pct"] > 0 else "🔴"
             lines.append(
                 f"  {emoji} **{a['coin']}** | OI: {a['oi_delta_pct']:+.1f}% "
-                f"({format_usd(a['oi_usd'])}) | 价格: {a['px_chg_pct']:+.1f}%"
+                f"({format_usd(a['oi_usd'])}) | "
+                f"现价: {format_price(a['price'])} | 24h: {a['px_chg_pct']:+.1f}%"
             )
             # 信号解读
             if a["oi_delta_pct"] > 0 and abs(a["px_chg_pct"]) < 3:
@@ -451,7 +465,7 @@ def build_oi_alert_report(alerts, watchlist_coins):
             emoji = "🟢" if a["oi_delta_pct"] > 0 else "🔴"
             lines.append(
                 f"  {emoji} {a['coin']} | OI: {a['oi_delta_pct']:+.1f}% | "
-                f"价格: {a['px_chg_pct']:+.1f}%"
+                f"现价: {format_price(a['price'])} | 24h: {a['px_chg_pct']:+.1f}%"
             )
     
     return "\n".join(lines)
@@ -591,6 +605,7 @@ def build_fuel_report(fuel_targets, squeeze_targets):
             flag = "🎯极度!" if fr_pct < -0.1 else "⚠️"
             lines.append(
                 f"  {flag} **{t['coin']}** | 涨{t['px_chg']:+.1f}% | "
+                f"现价{format_price(t['price'])} | "
                 f"费率🧊{fr_pct:.4f}% | Vol {format_usd(t['vol'])}"
             )
         lines.append("")
@@ -600,7 +615,8 @@ def build_fuel_report(fuel_targets, squeeze_targets):
         for t in squeeze_targets[:8]:
             fr_pct = t["funding"] * 100
             lines.append(
-                f"  🧊 {t['coin']} | 价格{t['px_chg']:+.1f}% | "
+                f"  🧊 {t['coin']} | 现价{format_price(t['price'])} | "
+                f"24h{t['px_chg']:+.1f}% | "
                 f"费率{fr_pct:.4f}% | Vol {format_usd(t['vol'])}"
             )
     

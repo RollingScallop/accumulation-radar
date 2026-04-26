@@ -34,8 +34,8 @@ jobs:
     env:
       TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
       TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
-      MIHOMO_VERSION: v1.19.23
       ENABLE_TG_PUSH: "true"
+      MIHOMO_VERSION: v1.19.23
       PROXY_URL: http://127.0.0.1:7897
     steps:
       - name: Checkout

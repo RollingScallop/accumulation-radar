@@ -1,0 +1,1638 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>趋势对冲阶梯交易配置台</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --panel-2: #f9fafb;
+      --ink: #17202a;
+      --muted: #667085;
+      --line: #d8dee6;
+      --line-strong: #b9c2cf;
+      --accent: #1677ff;
+      --accent-2: #0f9f6e;
+      --danger: #d64545;
+      --warn: #b7791f;
+      --shadow: 0 12px 28px rgba(18, 32, 47, 0.08);
+      --radius: 8px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 1180px;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 7px;
+      min-height: 36px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      border-color: var(--line-strong);
+      background: #f7f9fc;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .primary:hover {
+      border-color: #0f66dc;
+      background: #0f66dc;
+    }
+
+    .danger {
+      border-color: #f0c7c7;
+      color: var(--danger);
+    }
+
+    .icon {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(244, 246, 248, 0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar {
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 280px;
+    }
+
+    .mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: #121a25;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      box-shadow: inset 0 -8px 18px rgba(255,255,255,0.12);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 760;
+      line-height: 1.15;
+    }
+
+    .brand p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(760px, 1fr) 420px;
+      gap: 18px;
+      padding: 18px 24px 32px;
+      align-items: start;
+    }
+
+    section,
+    aside {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-head {
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: 750;
+    }
+
+    .panel-head span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .cols-5 {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #344054;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 7px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    textarea {
+      min-height: 72px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.12);
+    }
+
+    .switch-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      align-items: center;
+      padding: 12px 0 0;
+    }
+
+    .market-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      padding: 10px;
+    }
+
+    .market-cell {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .market-cell span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .market-cell strong {
+      font-family: var(--mono);
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #344054;
+      font-size: 13px;
+      font-weight: 620;
+    }
+
+    .check input {
+      width: 16px;
+      height: 16px;
+      min-height: auto;
+      accent-color: var(--accent);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      min-width: 1080px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px;
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: #eef2f6;
+      color: #475467;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 760;
+    }
+
+    td {
+      font-size: 12px;
+    }
+
+    td input,
+    td select {
+      min-height: 32px;
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+
+    td input[type="checkbox"] {
+      width: 16px;
+      min-height: 16px;
+      accent-color: var(--accent);
+    }
+
+    tbody tr:hover {
+      background: #fbfcfe;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .order-no {
+      width: 32px;
+      height: 24px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      display: grid;
+      place-items: center;
+      color: #475467;
+      font-family: var(--mono);
+      font-size: 12px;
+      background: var(--panel-2);
+    }
+
+    .summary {
+      position: sticky;
+      top: 86px;
+      display: grid;
+      gap: 14px;
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      border-radius: var(--radius);
+      padding: 12px;
+      min-height: 74px;
+    }
+
+    .metric .label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .metric .value {
+      display: block;
+      margin-top: 8px;
+      font-size: 20px;
+      font-weight: 780;
+      font-family: var(--mono);
+      line-height: 1.1;
+    }
+
+    .metric .note {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .preview-list {
+      display: grid;
+      gap: 8px;
+      max-height: 390px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .preview-row {
+      display: grid;
+      grid-template-columns: 66px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 9px 10px;
+      background: #fff;
+    }
+
+    .preview-row strong {
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+
+    .preview-row .meta {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .preview-row .money {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: #344054;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      padding: 0 7px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #475467;
+      font-size: 11px;
+      font-weight: 720;
+    }
+
+    .tag.long {
+      border-color: #bfe7d7;
+      background: #edfdf6;
+      color: #057a55;
+    }
+
+    .tag.short {
+      border-color: #f3c6c6;
+      background: #fff1f1;
+      color: #b42318;
+    }
+
+    .tag.warn {
+      border-color: #f4d79d;
+      background: #fff8e8;
+      color: var(--warn);
+    }
+
+    .json-box {
+      width: 100%;
+      min-height: 190px;
+      max-height: 280px;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #0f1720;
+      color: #d6e2f0;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: 11px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
+    .save-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 12px;
+      padding-top: 10px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    @media (max-width: 980px) {
+      body {
+        min-width: 0;
+      }
+
+      .topbar {
+        height: auto;
+        padding: 14px;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .toolbar {
+        width: 100%;
+        overflow: auto;
+        padding-bottom: 2px;
+      }
+
+      main {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+
+      .summary {
+        position: static;
+      }
+
+      .cols-4,
+      .cols-3,
+      .cols-5,
+      .market-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 12h4l3 7 4-14 2 7h3"/></svg>
+        </div>
+        <div>
+          <h1>趋势对冲阶梯交易配置台</h1>
+          <p>手动触发后按保存方案生成多空首单、趋势加仓和联动退出规则</p>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button type="button" id="loadBtn" title="读取本机已保存的方案">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          读取
+        </button>
+        <button type="button" id="saveBtn" class="primary" title="保存当前方案到浏览器本地">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+          保存方案
+        </button>
+        <button type="button" id="exportBtn" title="导出当前方案 JSON">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+          导出 JSON
+        </button>
+        <button type="button" id="importBtn" title="从 JSON 文本导入方案">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="M17 14l-5-5-5 5"/><path d="M5 3h14"/></svg>
+          导入 JSON
+        </button>
+        <button type="button" id="backtestTemplateBtn" title="套用上面回测使用的 1h 默认模板">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16l3-5 3 2 4-7"/></svg>
+          回测模板
+        </button>
+        <button type="button" id="refreshMarketBtn" title="从 Binance USDT 永续拉取当前价格和合约精度">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4"/></svg>
+          刷新现价
+        </button>
+        <button type="button" id="startStrategyBtn" class="primary" title="把当前方案发送给后端启动接口">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M5 3l14 9-14 9V3Z"/></svg>
+          启动
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="stack">
+      <section>
+        <div class="panel-head">
+          <div>
+            <h2>基础参数</h2>
+            <span>L0 市价对冲立即启动；L1-L10 是趋势确认后的阶梯计划</span>
+          </div>
+          <span id="savedAt">未保存</span>
+        </div>
+        <div class="panel-body grid">
+          <div class="grid cols-5">
+            <label>方案名称
+              <input id="planName" value="1H 手动趋势对冲阶梯">
+            </label>
+            <label>雷达池下拉
+              <select id="poolSymbol">
+                <option value="">读取中...</option>
+              </select>
+            </label>
+            <label>交易标的
+              <input id="symbol" value="BTCUSDT" list="symbolOptions" spellcheck="false">
+              <datalist id="symbolOptions"></datalist>
+            </label>
+            <label>参考价格
+              <input id="referencePrice" type="number" min="0" step="0.0001" value="100">
+            </label>
+            <label>K 线级别
+              <select id="timeframe">
+                <option value="1h" selected>1h</option>
+                <option value="4h">4h</option>
+                <option value="1d">1d</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grid cols-4">
+            <label>账户模式
+              <select id="positionMode">
+                <option value="hedge" selected>双向持仓 Hedge Mode</option>
+                <option value="oneway">单向持仓 One-way</option>
+              </select>
+            </label>
+            <label>保证金模式
+              <select id="marginMode">
+                <option value="isolated" selected>逐仓</option>
+                <option value="cross">全仓</option>
+              </select>
+            </label>
+            <label>杠杆
+              <input id="leverage" type="number" min="1" max="125" step="1" value="3">
+            </label>
+            <label>最多层数
+              <input id="maxLayers" type="number" min="1" max="10" step="1" value="10">
+            </label>
+          </div>
+
+          <div class="market-strip">
+            <div class="market-cell">
+              <span>Binance 现价</span>
+              <strong id="livePriceText">未拉取</strong>
+            </div>
+            <div class="market-cell">
+              <span>24h 涨跌</span>
+              <strong id="change24hText">--</strong>
+            </div>
+            <div class="market-cell">
+              <span>价格 / 数量精度</span>
+              <strong id="precisionText">--</strong>
+            </div>
+            <div class="market-cell">
+              <span>数据状态</span>
+              <strong id="marketStatusText">等待刷新</strong>
+            </div>
+          </div>
+
+          <div class="grid cols-4">
+            <label>趋势总名义金额 USDT
+              <input id="totalNotional" type="number" min="0" step="10" value="1000">
+            </label>
+            <label>第0层单边对冲金额 USDT
+              <input id="probeNotionalInput" type="number" min="0" step="1" value="220">
+            </label>
+            <label>对冲腿止损 %
+              <input id="hedgeStopPct" type="number" min="0" step="0.1" value="10">
+            </label>
+            <label>策略组最大净亏损 USDT
+              <input id="maxGroupLoss" type="number" min="0" step="1" value="100">
+            </label>
+            <label>手续费 + 滑点 %
+              <input id="feeSlipPct" type="number" min="0" step="0.01" value="0.12">
+            </label>
+          </div>
+
+          <div class="grid cols-3">
+            <label>方向确认方式
+              <select id="confirmMode">
+                <option value="manual" selected>手动确认后只加趋势边</option>
+                <option value="close_outside">收盘突破区间后确认</option>
+                <option value="two_close_outside">连续两根收盘在区间外</option>
+              </select>
+            </label>
+            <label>浮盈加仓锁利方式
+              <select id="profitLockMode">
+                <option value="trail_group" selected>策略组浮盈回撤锁利</option>
+                <option value="move_stop_to_cost">回本线 + 对冲亏损补偿</option>
+                <option value="partial_take_profit">分批止盈后移动保护线</option>
+              </select>
+            </label>
+            <label>趋势腿退出时
+              <select id="exitMode">
+                <option value="close_group" selected>趋势腿与剩余对冲腿一起平</option>
+                <option value="close_trend_only">只平趋势腿</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grid cols-3">
+            <label>动态止盈启动 %
+              <input id="takeProfitStartPct" type="number" min="0" step="0.1" value="8">
+            </label>
+            <label>回撤锁利 %
+              <input id="trailGivebackPct" type="number" min="0" step="0.1" value="3">
+            </label>
+            <label>满 10 层后分批止盈 %
+              <input id="fullPositionTakePct" type="number" min="0" step="1" value="25">
+            </label>
+          </div>
+
+          <div class="grid cols-3">
+            <label>后端启动接口
+              <input id="backendStartUrl" value="http://127.0.0.1:8787/api/strategy/start" spellcheck="false">
+            </label>
+            <label>确认突破 ATR buffer
+              <input id="confirmBufferAtr" type="number" min="0" step="0.01" value="0.20">
+            </label>
+            <label>确认量能倍数
+              <input id="confirmVolumeMult" type="number" min="0" step="0.05" value="1.20">
+            </label>
+            <label>启动价格来源
+              <select id="priceSource">
+                <option value="live" selected>按现价自动生成</option>
+                <option value="manual">使用手动参考价</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="switch-row">
+            <label class="check"><input id="openProbeHedge" type="checkbox" checked> 启动时同时市价开 LONG_0 + SHORT_0</label>
+            <label class="check"><input id="cancelOppositeAfterConfirm" type="checkbox" checked> 确认方向后不再增加反向单</label>
+            <label class="check"><input id="closeHedgeWithTrendExit" type="checkbox" checked> 趋势退出时同步平掉剩余对冲腿</label>
+            <label class="check"><input id="useReduceOnlyExit" type="checkbox" checked> 平仓单使用 reduceOnly</label>
+            <label class="check"><input id="dryRunStart" type="checkbox" checked> 启动先走 dry-run</label>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="panel-head">
+          <div>
+            <h2>每层挂单参数</h2>
+            <span>第0层是市价对冲；第1层开始才是趋势阶梯</span>
+          </div>
+          <div class="actions">
+            <button type="button" id="applyDefaultBtn" title="恢复默认 10 层权重和间隔">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v6h6"/></svg>
+              默认阶梯
+            </button>
+            <button type="button" id="recalcBtn" title="按趋势总金额重新分配每层金额">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+              重算金额
+            </button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>启用</th>
+                  <th>层</th>
+                  <th>角色</th>
+                  <th>订单类型</th>
+                  <th>价格间隔 %</th>
+                  <th>多单价格</th>
+                  <th>空单价格</th>
+                  <th>金额 USDT</th>
+                  <th>占用保证金</th>
+                  <th>多单数量</th>
+                  <th>空单数量</th>
+                  <th>止盈动作</th>
+                  <th>备注</th>
+                </tr>
+              </thead>
+              <tbody id="layerBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="panel-head">
+          <div>
+            <h2>执行备注</h2>
+            <span>这里会一起保存到方案 JSON，后续接 API 时用于人工复核</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <textarea id="notes">手动启动后先开首组对冲仓；确认趋势方向后只加盈利方向。对冲腿亏损达到 10% 先平，趋势腿退出时同步平掉剩余对冲腿或取消未成交订单。</textarea>
+        </div>
+      </section>
+    </div>
+
+    <aside class="summary">
+      <section>
+        <div class="panel-head">
+          <div>
+            <h2>方案摘要</h2>
+            <span>实时计算</span>
+          </div>
+          <span class="tag warn" id="modeTag">模拟配置</span>
+        </div>
+        <div class="panel-body grid">
+          <div class="metric-grid">
+            <div class="metric">
+              <span class="label">启用层数</span>
+              <span class="value" id="enabledLayers">10</span>
+              <span class="note">最多 10 层</span>
+            </div>
+            <div class="metric">
+              <span class="label">趋势金额</span>
+              <span class="value" id="trendNotional">1000</span>
+              <span class="note">不含反向对冲首单</span>
+            </div>
+            <div class="metric">
+              <span class="label">首组对冲</span>
+              <span class="value" id="probeNotional">440</span>
+              <span class="note">LONG_0 + SHORT_0</span>
+            </div>
+            <div class="metric">
+              <span class="label">对冲止损</span>
+              <span class="value" id="hedgeStopText">10%</span>
+              <span class="note">确认方向后用于反向腿</span>
+            </div>
+            <div class="metric">
+              <span class="label">预计最大保证金</span>
+              <span class="value" id="marginUsedText">0</span>
+              <span class="note">趋势腿 + 首组反向腿</span>
+            </div>
+            <div class="metric">
+              <span class="label">当前参考价</span>
+              <span class="value" id="referencePriceText">100</span>
+              <span class="note">用于按涨跌百分比推挂单价</span>
+            </div>
+          </div>
+          <div class="save-line">
+            <span id="validationText">配置正常</span>
+            <span id="dirtyText">未修改</span>
+          </div>
+          <div class="save-line">
+            <span id="startStatusText">尚未启动</span>
+            <span id="startModeText">dry-run</span>
+          </div>
+          <div class="actions">
+            <button type="button" id="confirmLongBtn" title="确认趋势为多头，只激活 LONG_1-LONG_10">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+              确认多头
+            </button>
+            <button type="button" id="confirmShortBtn" title="确认趋势为空头，只激活 SHORT_1-SHORT_10">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+              确认空头
+            </button>
+            <button type="button" id="closeGroupBtn" class="danger" title="关闭当前策略组">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              关闭策略组
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="panel-head">
+          <div>
+            <h2>挂单预览</h2>
+            <span>手动确认方向后选择 LONG 或 SHORT 侧执行</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="preview-list" id="previewList"></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="panel-head">
+          <div>
+            <h2>方案 JSON</h2>
+            <span>后续可直接交给执行器</span>
+          </div>
+        </div>
+        <div class="panel-body grid">
+          <pre class="json-box" id="jsonBox"></pre>
+          <div class="actions">
+            <button type="button" id="copyBtn" title="复制方案 JSON">
+              <svg class="icon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              复制
+            </button>
+            <button type="button" id="clearBtn" class="danger" title="清空本地保存">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
+              清空保存
+            </button>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </main>
+
+  <script src="./radar_watchlist_embed.js"></script>
+  <script>
+    const STORAGE_KEY = "trend-ladder-strategy-plan-v1";
+    const defaultWeights = [0.22, 0.18, 0.15, 0.12, 0.10, 0.08, 0.06, 0.04, 0.03, 0.02];
+    const defaultTrendOffsets = [1.2, 2.5, 4, 5.8, 7.8, 10, 12.5, 15, 18, 21];
+    const fallbackRadarPool = window.RADAR_WATCHLIST || [
+      { symbol: "TRUTHUSDT", score: 81.37, status: "🔥放量启动" },
+      { symbol: "MITOUSDT", score: 80.43, status: "🔥放量启动" },
+      { symbol: "1000XECUSDT", score: 80.34, status: "🔥放量启动" },
+      { symbol: "IOUSDT", score: 80.13, status: "🔥放量启动" },
+      { symbol: "1000000BOBUSDT", score: 80.07, status: "🔥放量启动" },
+      { symbol: "DIAUSDT", score: 79.76, status: "🔥放量启动" },
+      { symbol: "HMSTRUSDT", score: 79.34, status: "🔥放量启动" },
+      { symbol: "WALUSDT", score: 79.32, status: "⚡开始放量" },
+      { symbol: "TUTUSDT", score: 78.98, status: "🔥放量启动" },
+      { symbol: "CARVUSDT", score: 78.91, status: "⚡开始放量" },
+      { symbol: "HYPERUSDT", score: 77.05, status: "🔥放量启动" }
+    ];
+    const layerBody = document.getElementById("layerBody");
+    let marketMeta = {
+      symbol: "",
+      lastPrice: 0,
+      priceChangePercent: null,
+      tickSize: 0.000001,
+      stepSize: 0.000001,
+      updatedAt: "",
+      source: "manual"
+    };
+    let lastStrategyGroupId = "";
+    const fields = [
+      "planName", "poolSymbol", "symbol", "referencePrice", "timeframe", "positionMode", "marginMode", "leverage",
+      "maxLayers", "totalNotional", "probeNotionalInput", "hedgeStopPct", "maxGroupLoss", "feeSlipPct", "confirmMode",
+      "profitLockMode", "exitMode", "takeProfitStartPct", "trailGivebackPct", "fullPositionTakePct",
+      "backendStartUrl", "confirmBufferAtr", "confirmVolumeMult", "priceSource",
+      "openProbeHedge", "cancelOppositeAfterConfirm", "closeHedgeWithTrendExit", "useReduceOnlyExit", "dryRunStart", "notes"
+    ];
+
+    function iconTag(side) {
+      return side === "LONG" ? '<span class="tag long">LONG</span>' : '<span class="tag short">SHORT</span>';
+    }
+
+    function money(value) {
+      const num = Number(value || 0);
+      if (!Number.isFinite(num)) return "0.00";
+      return num.toLocaleString("en-US", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+    }
+
+    function price(value) {
+      const num = Number(value || 0);
+      if (!Number.isFinite(num)) return "0";
+      return num.toLocaleString("en-US", { maximumFractionDigits: 10 });
+    }
+
+    function normalizeSymbol(value) {
+      return String(value || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+    }
+
+    function decimalsFromStep(step) {
+      const text = String(step || "");
+      if (!text.includes(".")) return 0;
+      return text.replace(/0+$/, "").split(".")[1]?.length || 0;
+    }
+
+    function roundDownToStep(value, step) {
+      const num = Number(value || 0);
+      const size = Number(step || 0);
+      if (!Number.isFinite(num) || num <= 0 || !Number.isFinite(size) || size <= 0) return num;
+      const decimals = decimalsFromStep(size);
+      return Number((Math.floor(num / size) * size).toFixed(decimals));
+    }
+
+    function inferPriceStep(value) {
+      const num = Math.abs(Number(value || 0));
+      if (!Number.isFinite(num) || num <= 0) return 0.000001;
+      if (num >= 1000) return 0.1;
+      if (num >= 100) return 0.01;
+      if (num >= 1) return 0.0001;
+      const decimals = Math.min(10, Math.ceil(Math.abs(Math.log10(num))) + 4);
+      return Number(`1e-${decimals}`);
+    }
+
+    function safeTickSize(value) {
+      const num = Number(value || 0);
+      const size = Number(marketMeta.tickSize || 0);
+      if (!Number.isFinite(size) || size <= 0 || size >= num || roundDownToStep(num, size) <= 0) {
+        return inferPriceStep(num);
+      }
+      return size;
+    }
+
+    function safeStepSize(value) {
+      const num = Number(value || 0);
+      const size = Number(marketMeta.stepSize || 0);
+      if (!Number.isFinite(size) || size <= 0 || size >= num || roundDownToStep(num, size) <= 0) {
+        return 0.000001;
+      }
+      return size;
+    }
+
+    function roundPrice(value) {
+      const rounded = roundDownToStep(value, safeTickSize(value));
+      return rounded > 0 ? rounded : Number(Number(value || 0).toPrecision(10));
+    }
+
+    function roundQty(value) {
+      const rounded = roundDownToStep(value, safeStepSize(value));
+      return rounded > 0 ? rounded : Number(Number(value || 0).toPrecision(10));
+    }
+
+    function buildRows() {
+      layerBody.innerHTML = "";
+      for (let i = 0; i <= 10; i += 1) {
+        const tr = document.createElement("tr");
+        tr.dataset.layer = String(i);
+        const isProbe = i === 0;
+        const role = isProbe ? "第0层市价对冲" : "趋势加仓";
+        const takeAction = i < 7 ? "继续持有" : i < 10 ? "允许分批止盈" : "满仓重点盯 K";
+        const defaultOffset = isProbe ? 0 : defaultTrendOffsets[i - 1];
+        const defaultNotional = isProbe ? 220 : Math.round(defaultWeights[i - 1] * 1000);
+        tr.innerHTML = `
+          <td><input class="layer-enabled" type="checkbox" checked aria-label="启用第 ${i} 层"></td>
+          <td><span class="order-no">${i}</span></td>
+          <td>
+            <select class="layer-role">
+              <option value="probe" ${isProbe ? "selected" : ""}>市价对冲</option>
+              <option value="trend" ${!isProbe ? "selected" : ""}>趋势加仓</option>
+            </select>
+          </td>
+          <td>
+            <select class="order-type">
+              <option value="market" ${isProbe ? "selected" : ""}>Market</option>
+              <option value="limit" ${!isProbe ? "selected" : ""}>Limit</option>
+              <option value="stop_limit">Stop Limit</option>
+            </select>
+          </td>
+          <td><input class="offset-pct" type="number" min="0" step="0.1" value="${defaultOffset}"></td>
+          <td><input class="long-price" type="number" min="0" step="0.0001" value="0"></td>
+          <td><input class="short-price" type="number" min="0" step="0.0001" value="0"></td>
+          <td><input class="notional" type="number" min="0" step="1" value="${defaultNotional}"></td>
+          <td><input class="margin-used" type="number" min="0" step="0.01" value="0" readonly></td>
+          <td><input class="long-qty" type="number" min="0" step="0.0001" value="0"></td>
+          <td><input class="short-qty" type="number" min="0" step="0.0001" value="0"></td>
+          <td>
+            <select class="take-action">
+              <option value="hold" ${takeAction === "继续持有" ? "selected" : ""}>继续持有</option>
+              <option value="partial" ${takeAction === "允许分批止盈" ? "selected" : ""}>允许分批止盈</option>
+              <option value="watch_top" ${takeAction === "满仓重点盯 K" ? "selected" : ""}>满仓重点盯 K</option>
+            </select>
+          </td>
+          <td><input class="layer-note" value="${role}"></td>
+        `;
+        layerBody.appendChild(tr);
+      }
+    }
+
+    function getInput(id) {
+      const el = document.getElementById(id);
+      if (el.type === "checkbox") return Boolean(el.checked);
+      if (el.type === "number") return Number(el.value || 0);
+      return el.value;
+    }
+
+    function setInput(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.type === "checkbox") {
+        el.checked = Boolean(value);
+      } else {
+        el.value = value ?? "";
+      }
+    }
+
+    function readLayers() {
+      return Array.from(layerBody.querySelectorAll("tr")).map((tr) => ({
+        index: Number(tr.dataset.layer),
+        enabled: tr.querySelector(".layer-enabled").checked,
+        role: tr.querySelector(".layer-role").value,
+        orderType: tr.querySelector(".order-type").value,
+        offsetPct: Number(tr.querySelector(".offset-pct").value || 0),
+        longPrice: Number(tr.querySelector(".long-price").value || 0),
+        shortPrice: Number(tr.querySelector(".short-price").value || 0),
+        notional: Number(tr.querySelector(".notional").value || 0),
+        marginUsed: Number(tr.querySelector(".margin-used").value || 0),
+        longQty: Number(tr.querySelector(".long-qty").value || 0),
+        shortQty: Number(tr.querySelector(".short-qty").value || 0),
+        takeAction: tr.querySelector(".take-action").value,
+        note: tr.querySelector(".layer-note").value
+      }));
+    }
+
+    function writeLayers(layers) {
+      const normalizedLayers = migrateLayers(layers);
+      const rows = Array.from(layerBody.querySelectorAll("tr"));
+      rows.forEach((tr, idx) => {
+        const layer = normalizedLayers[idx];
+        if (!layer) return;
+        tr.querySelector(".layer-enabled").checked = Boolean(layer.enabled);
+        tr.querySelector(".layer-role").value = layer.role || (idx === 0 ? "probe" : "trend");
+        tr.querySelector(".order-type").value = layer.orderType || (idx === 0 ? "market" : "limit");
+        tr.querySelector(".offset-pct").value = layer.offsetPct ?? (idx === 0 ? 0 : defaultTrendOffsets[idx - 1]);
+        tr.querySelector(".long-price").value = layer.longPrice ?? 0;
+        tr.querySelector(".short-price").value = layer.shortPrice ?? 0;
+        tr.querySelector(".notional").value = layer.notional ?? 0;
+        tr.querySelector(".margin-used").value = layer.marginUsed ?? 0;
+        tr.querySelector(".long-qty").value = layer.longQty ?? 0;
+        tr.querySelector(".short-qty").value = layer.shortQty ?? 0;
+        tr.querySelector(".take-action").value = layer.takeAction || "hold";
+        tr.querySelector(".layer-note").value = layer.note || "";
+      });
+    }
+
+    function migrateLayers(layers) {
+      if (!Array.isArray(layers) || !layers.length) return [];
+      const hasLayerZero = layers.some((layer) => Number(layer.index) === 0);
+      if (hasLayerZero) return layers;
+      const oldProbe = layers[0] || {};
+      const migrated = [{
+        ...oldProbe,
+        index: 0,
+        enabled: true,
+        role: "probe",
+        orderType: "market",
+        offsetPct: 0,
+        note: "第0层市价对冲"
+      }];
+      layers.forEach((layer, idx) => {
+        migrated.push({
+          ...layer,
+          index: idx + 1,
+          role: "trend",
+          orderType: layer.orderType === "market" ? "limit" : (layer.orderType || "limit"),
+          offsetPct: layer.offsetPct || defaultTrendOffsets[idx] || 0,
+          note: layer.note && layer.note !== "首组对冲" ? layer.note : "趋势加仓"
+        });
+      });
+      return migrated.slice(0, 11);
+    }
+
+    function getPlan() {
+      const config = {};
+      fields.forEach((id) => {
+        config[id] = getInput(id);
+      });
+      return {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        config,
+        market: {
+          symbol: marketMeta.symbol || normalizeSymbol(config.symbol),
+          lastPrice: marketMeta.lastPrice,
+          priceChangePercent24h: marketMeta.priceChangePercent,
+          tickSize: marketMeta.tickSize,
+          stepSize: marketMeta.stepSize,
+          updatedAt: marketMeta.updatedAt,
+          source: marketMeta.source
+        },
+        layers: readLayers(),
+        probeLayer: readLayers().find((layer) => layer.index === 0) || null,
+        trendLayers: readLayers().filter((layer) => layer.index > 0),
+        executionGuardrails: {
+          firstAction: config.openProbeHedge ? "MARKET_OPEN_LONG_0_AND_SHORT_0" : "WAIT_MANUAL_DIRECTION",
+          afterDirectionConfirm: "ADD_TREND_SIDE_ONLY",
+          hedgeStop: `close opposite probe leg at ${config.hedgeStopPct}% adverse move`,
+          groupExit: config.closeHedgeWithTrendExit ? "close trend leg and remaining hedge leg together" : "close trend leg only",
+          liveTrading: false
+        }
+      };
+    }
+
+    function applyRowPrice(tr) {
+      const ref = Number(document.getElementById("referencePrice").value || 0);
+      const layerIndex = Number(tr.dataset.layer);
+      const offset = layerIndex === 0 ? 0 : Number(tr.querySelector(".offset-pct").value || 0) / 100;
+      const longPrice = layerIndex === 0 ? roundPrice(ref) : roundPrice(ref * (1 + offset));
+      const shortPrice = layerIndex === 0 ? roundPrice(ref) : roundPrice(ref * (1 - offset));
+      const notional = Number(tr.querySelector(".notional").value || 0);
+      const leverage = Math.max(1, Number(document.getElementById("leverage").value || 1));
+      tr.querySelector(".long-price").value = longPrice > 0 ? String(longPrice) : "0";
+      tr.querySelector(".short-price").value = shortPrice > 0 ? String(shortPrice) : "0";
+      tr.querySelector(".margin-used").value = (notional / leverage).toFixed(2);
+      tr.querySelector(".long-qty").value = longPrice > 0 ? String(roundQty(notional / longPrice)) : "0";
+      tr.querySelector(".short-qty").value = shortPrice > 0 ? String(roundQty(notional / shortPrice)) : "0";
+    }
+
+    function applyPriceFromOffsets() {
+      Array.from(layerBody.querySelectorAll("tr")).forEach((tr) => {
+        applyRowPrice(tr);
+      });
+    }
+
+    function recalcNotional() {
+      const total = Number(document.getElementById("totalNotional").value || 0);
+      const probeNotional = Number(document.getElementById("probeNotionalInput").value || 0);
+      const maxLayers = Math.max(1, Math.min(10, Number(document.getElementById("maxLayers").value || 10)));
+      const activeWeights = defaultWeights.slice(0, maxLayers);
+      const weightSum = activeWeights.reduce((sum, value) => sum + value, 0);
+      Array.from(layerBody.querySelectorAll("tr")).forEach((tr, idx) => {
+        if (idx === 0) {
+          tr.querySelector(".layer-enabled").checked = Boolean(getInput("openProbeHedge"));
+          tr.querySelector(".notional").value = probeNotional;
+        } else {
+          const enabled = idx <= maxLayers;
+          tr.querySelector(".layer-enabled").checked = enabled;
+          const weight = defaultWeights[idx - 1] || 0;
+          const normalized = weightSum > 0 && enabled ? weight / weightSum : 0;
+          tr.querySelector(".notional").value = Math.round(total * normalized * 100) / 100;
+        }
+      });
+      applyPriceFromOffsets();
+      render();
+    }
+
+    function applyDefaultLadder() {
+      Array.from(layerBody.querySelectorAll("tr")).forEach((tr, idx) => {
+        tr.querySelector(".offset-pct").value = idx === 0 ? 0 : defaultTrendOffsets[idx - 1];
+        tr.querySelector(".layer-role").value = idx === 0 ? "probe" : "trend";
+        tr.querySelector(".order-type").value = idx === 0 ? "market" : "limit";
+        tr.querySelector(".take-action").value = idx >= 9 ? "watch_top" : idx >= 6 ? "partial" : "hold";
+        tr.querySelector(".layer-note").value = idx === 0 ? "第0层市价对冲" : "趋势加仓";
+      });
+      recalcNotional();
+    }
+
+    function applyBacktestTemplate() {
+      setInput("planName", "1H 回测默认趋势对冲阶梯");
+      setInput("timeframe", "1h");
+      setInput("positionMode", "hedge");
+      setInput("marginMode", "isolated");
+      setInput("leverage", 3);
+      setInput("maxLayers", 10);
+      setInput("totalNotional", 1000);
+      setInput("probeNotionalInput", 220);
+      setInput("hedgeStopPct", 10);
+      setInput("maxGroupLoss", 100);
+      setInput("feeSlipPct", 0.12);
+      setInput("confirmMode", "two_close_outside");
+      setInput("profitLockMode", "trail_group");
+      setInput("exitMode", "close_group");
+      setInput("takeProfitStartPct", 8);
+      setInput("trailGivebackPct", 3);
+      setInput("fullPositionTakePct", 25);
+      setInput("confirmBufferAtr", 0.20);
+      setInput("confirmVolumeMult", 1.20);
+      setInput("priceSource", "live");
+      setInput("backendStartUrl", "http://127.0.0.1:8787/api/strategy/start");
+      setInput("openProbeHedge", true);
+      setInput("cancelOppositeAfterConfirm", true);
+      setInput("closeHedgeWithTrendExit", true);
+      setInput("useReduceOnlyExit", true);
+      setInput("dryRunStart", true);
+      setInput("notes", "回测模板：1h 级别；启动时 LONG_0 + SHORT_0 以市价同时开；连续两根 1h 收盘在区间外且量能确认后，只从第1层开始加趋势边；对冲腿亏损 10% 平掉；趋势腿退出时同步处理剩余对冲腿和未成交单。");
+      applyDefaultLadder();
+    }
+
+    function populatePool(pool) {
+      const rows = pool && pool.length ? pool : fallbackRadarPool;
+      const select = document.getElementById("poolSymbol");
+      const datalist = document.getElementById("symbolOptions");
+      select.innerHTML = `<option value="">手动输入 / 搜索池子</option>`;
+      datalist.innerHTML = "";
+      rows.forEach((item) => {
+        const symbol = normalizeSymbol(item.symbol);
+        const label = `${symbol}  ${Number(item.score || 0).toFixed(1)}  ${item.status || ""}`;
+        const option = document.createElement("option");
+        option.value = symbol;
+        option.textContent = label;
+        select.appendChild(option);
+
+        const dataOption = document.createElement("option");
+        dataOption.value = symbol;
+        dataOption.label = label;
+        datalist.appendChild(dataOption);
+      });
+      document.getElementById("marketStatusText").textContent = rows === fallbackRadarPool ? "使用内置雷达池" : "已读取雷达池";
+    }
+
+    async function loadRadarPool() {
+      try {
+        const response = await fetch("radar_watchlist.json", { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        populatePool(data.symbols || data);
+      } catch (_error) {
+        populatePool(fallbackRadarPool);
+      }
+    }
+
+    async function fetchJson(url) {
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 8000);
+      try {
+        const response = await fetch(url, { cache: "no-store", signal: controller.signal });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      } finally {
+        window.clearTimeout(timer);
+      }
+    }
+
+    async function fetchTicker(symbol) {
+      try {
+        return await fetchJson(`https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${symbol}`);
+      } catch (_error) {
+        const mark = await fetchJson(`https://fapi.binance.com/fapi/v1/premiumIndex?symbol=${symbol}`);
+        return {
+          lastPrice: mark.markPrice,
+          weightedAvgPrice: mark.indexPrice,
+          priceChangePercent: null
+        };
+      }
+    }
+
+    async function fetchSymbolMeta(symbol) {
+      try {
+        const exchangeInfo = await fetchJson(`https://fapi.binance.com/fapi/v1/exchangeInfo?symbol=${symbol}`);
+        const info = exchangeInfo.symbols && exchangeInfo.symbols[0];
+        const priceFilter = info?.filters?.find((item) => item.filterType === "PRICE_FILTER");
+        const lotFilter = info?.filters?.find((item) => item.filterType === "LOT_SIZE");
+        return {
+          tickSize: Number(priceFilter?.tickSize || marketMeta.tickSize || 0.000001),
+          stepSize: Number(lotFilter?.stepSize || marketMeta.stepSize || 0.000001)
+        };
+      } catch (_error) {
+        return {
+          tickSize: marketMeta.tickSize || 0.000001,
+          stepSize: marketMeta.stepSize || 0.000001
+        };
+      }
+    }
+
+    async function refreshMarket(options = {}) {
+      const shouldSyncOrders = options.syncOrders !== false;
+      const symbol = normalizeSymbol(getInput("symbol"));
+      if (!symbol) return;
+      setInput("symbol", symbol);
+      document.getElementById("marketStatusText").textContent = "拉取中...";
+      try {
+        const ticker = await fetchTicker(symbol);
+        const meta = await fetchSymbolMeta(symbol);
+        marketMeta = {
+          symbol,
+          lastPrice: Number(ticker.lastPrice || 0) || Number(ticker.weightedAvgPrice || 0),
+          priceChangePercent: ticker.priceChangePercent === null ? null : Number(ticker.priceChangePercent || 0),
+          tickSize: meta.tickSize,
+          stepSize: meta.stepSize,
+          updatedAt: new Date().toISOString(),
+          source: "binance_futures_public"
+        };
+        marketMeta.tickSize = safeTickSize(marketMeta.lastPrice);
+        if (marketMeta.lastPrice > 0 && shouldSyncOrders) {
+          setInput("priceSource", "live");
+          setInput("referencePrice", marketMeta.lastPrice);
+          applyPriceFromOffsets();
+          document.getElementById("dirtyText").textContent = "已按现价重算挂单";
+        }
+        renderMarketMeta();
+        render();
+      } catch (error) {
+        document.getElementById("marketStatusText").textContent = `拉取失败：${error.message}`;
+      }
+    }
+
+    function renderMarketMeta() {
+      document.getElementById("livePriceText").textContent = marketMeta.lastPrice ? price(marketMeta.lastPrice) : "未拉取";
+      document.getElementById("change24hText").textContent = marketMeta.priceChangePercent === null ? "--" : `${marketMeta.priceChangePercent.toFixed(2)}%`;
+      document.getElementById("precisionText").textContent = `${marketMeta.tickSize || "--"} / ${marketMeta.stepSize || "--"}`;
+      document.getElementById("marketStatusText").textContent = marketMeta.updatedAt ? new Date(marketMeta.updatedAt).toLocaleTimeString("zh-CN", { hour12: false }) : "等待刷新";
+    }
+
+    function validation(plan) {
+      const issues = [];
+      const cfg = plan.config;
+      const enabled = plan.layers.filter((item) => item.enabled);
+      const trendEnabled = enabled.filter((item) => item.index > 0);
+      const probe = plan.layers.find((item) => item.index === 0);
+      if (cfg.positionMode !== "hedge") issues.push("需要双向持仓模式才能同时开多空");
+      if (cfg.openProbeHedge && (!probe || !probe.enabled)) issues.push("第0层市价对冲必须启用");
+      if (trendEnabled.length < 1) issues.push("至少启用 1 个趋势层");
+      if (!cfg.symbol) issues.push("缺少交易标的");
+      if (!cfg.backendStartUrl) issues.push("缺少后端启动接口");
+      if (cfg.referencePrice <= 0) issues.push("参考价格必须大于 0");
+      if (cfg.hedgeStopPct <= 0) issues.push("对冲腿止损必须大于 0");
+      if (cfg.openProbeHedge && Number(cfg.probeNotionalInput || 0) <= 0) issues.push("第0层对冲金额必须大于 0");
+      if (enabled.some((item) => item.notional <= 0)) issues.push("启用层的金额必须大于 0");
+      return issues;
+    }
+
+    function render() {
+      const plan = getPlan();
+      const enabled = plan.layers.filter((item) => item.enabled);
+      const probe = enabled.find((item) => item.index === 0);
+      const trendLayers = enabled.filter((item) => item.index > 0);
+      const trendNotional = trendLayers.reduce((sum, item) => sum + Number(item.notional || 0), 0);
+      const probeNotional = probe && plan.config.openProbeHedge ? probe.notional * 2 : 0;
+      const leverage = Math.max(1, Number(plan.config.leverage || 1));
+      const maxMargin = (trendNotional + (probe && plan.config.openProbeHedge ? Number(probe.notional || 0) : 0)) / leverage;
+      document.getElementById("enabledLayers").textContent = `L0 + ${trendLayers.length}`;
+      document.getElementById("trendNotional").textContent = money(trendNotional);
+      document.getElementById("probeNotional").textContent = money(probeNotional);
+      document.getElementById("hedgeStopText").textContent = `${plan.config.hedgeStopPct}%`;
+      document.getElementById("marginUsedText").textContent = money(maxMargin);
+      document.getElementById("referencePriceText").textContent = price(plan.config.referencePrice);
+      document.getElementById("startModeText").textContent = plan.config.dryRunStart ? "dry-run" : "live";
+
+      const issues = validation(plan);
+      const validationText = document.getElementById("validationText");
+      validationText.textContent = issues.length ? issues[0] : "配置正常";
+      validationText.style.color = issues.length ? "var(--danger)" : "var(--accent-2)";
+      document.getElementById("dirtyText").textContent = "有未保存修改";
+
+      const preview = [];
+      enabled.forEach((layer) => {
+        if (layer.index === 0 && plan.config.openProbeHedge) {
+          preview.push({ side: "LONG", layer, price: layer.longPrice, qty: layer.longQty, role: "PROBE" });
+          preview.push({ side: "SHORT", layer, price: layer.shortPrice, qty: layer.shortQty, role: "PROBE" });
+        } else {
+          preview.push({ side: "LONG", layer, price: layer.longPrice, qty: layer.longQty, role: "TREND_ONLY_AFTER_CONFIRM" });
+          preview.push({ side: "SHORT", layer, price: layer.shortPrice, qty: layer.shortQty, role: "TREND_ONLY_AFTER_CONFIRM" });
+        }
+      });
+
+      document.getElementById("previewList").innerHTML = preview.map((item) => `
+        <div class="preview-row">
+          <strong>${iconTag(item.side)}</strong>
+          <div>
+            <div class="meta">${item.side}_${item.layer.index} / ${item.role}</div>
+            <div class="meta">价格 ${price(item.price)} / 数量 ${price(item.qty)} / 保证金 ${money(item.layer.marginUsed)}U / ${item.layer.orderType}</div>
+          </div>
+          <span class="money">${money(item.layer.notional)}U</span>
+        </div>
+      `).join("");
+
+      document.getElementById("jsonBox").textContent = JSON.stringify(plan, null, 2);
+    }
+
+    function savePlan() {
+      const plan = getPlan();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
+      const text = new Date().toLocaleString("zh-CN", { hour12: false });
+      document.getElementById("savedAt").textContent = `已保存 ${text}`;
+      document.getElementById("dirtyText").textContent = "已保存";
+    }
+
+    function loadPlan() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const plan = JSON.parse(raw);
+      if (plan.config) {
+        fields.forEach((id) => setInput(id, plan.config[id]));
+      }
+      if (Array.isArray(plan.layers)) writeLayers(plan.layers);
+      document.getElementById("savedAt").textContent = plan.savedAt ? `读取 ${new Date(plan.savedAt).toLocaleString("zh-CN", { hour12: false })}` : "已读取";
+      render();
+      document.getElementById("dirtyText").textContent = "已读取";
+      return true;
+    }
+
+    function exportPlan() {
+      const blob = new Blob([JSON.stringify(getPlan(), null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${getInput("symbol") || "strategy"}-trend-ladder-plan.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function importPlan() {
+      const raw = window.prompt("粘贴方案 JSON");
+      if (!raw) return;
+      try {
+        const plan = JSON.parse(raw);
+        if (!plan.config || !Array.isArray(plan.layers)) throw new Error("格式不完整");
+        fields.forEach((id) => setInput(id, plan.config[id]));
+        writeLayers(plan.layers);
+        render();
+      } catch (error) {
+        window.alert(`导入失败：${error.message}`);
+      }
+    }
+
+    function copyPlan() {
+      navigator.clipboard.writeText(JSON.stringify(getPlan(), null, 2)).then(() => {
+        document.getElementById("dirtyText").textContent = "JSON 已复制";
+      });
+    }
+
+    async function startStrategy() {
+      const plan = getPlan();
+      const issues = validation(plan);
+      const status = document.getElementById("startStatusText");
+      const mode = document.getElementById("startModeText");
+      mode.textContent = plan.config.dryRunStart ? "dry-run" : "live";
+      if (issues.length) {
+        status.textContent = `无法启动：${issues[0]}`;
+        status.style.color = "var(--danger)";
+        return;
+      }
+      const payload = {
+        action: "start_hedged_trend_ladder",
+        dryRun: Boolean(plan.config.dryRunStart),
+        requestedAt: new Date().toISOString(),
+        plan
+      };
+      status.textContent = "发送启动请求中...";
+      status.style.color = "var(--muted)";
+      try {
+        const response = await fetch(plan.config.backendStartUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const text = await response.text();
+        if (!response.ok) throw new Error(text || `HTTP ${response.status}`);
+        const result = text ? JSON.parse(text) : {};
+        lastStrategyGroupId = result.strategyGroupId || "";
+        status.textContent = lastStrategyGroupId ? `已启动 ${lastStrategyGroupId}` : "启动请求已发送";
+        status.style.color = "var(--accent-2)";
+        document.getElementById("dirtyText").textContent = "启动 payload 已提交";
+      } catch (error) {
+        status.textContent = `后端未连接：${error.message}`;
+        status.style.color = "var(--danger)";
+        navigator.clipboard?.writeText(JSON.stringify(payload, null, 2));
+      }
+    }
+
+    function backendBaseUrl() {
+      const url = String(getInput("backendStartUrl") || "").trim();
+      return url.replace(/\/api\/strategy\/start\/?$/, "/api/strategy");
+    }
+
+    async function postStrategyAction(path, payload) {
+      const status = document.getElementById("startStatusText");
+      if (!lastStrategyGroupId) {
+        status.textContent = "没有当前策略组，请先启动";
+        status.style.color = "var(--danger)";
+        return;
+      }
+      status.textContent = "发送中...";
+      status.style.color = "var(--muted)";
+      try {
+        const response = await fetch(`${backendBaseUrl()}${path}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ strategyGroupId: lastStrategyGroupId, ...payload })
+        });
+        const text = await response.text();
+        if (!response.ok) throw new Error(text || `HTTP ${response.status}`);
+        const result = text ? JSON.parse(text) : {};
+        status.textContent = `${result.status || "操作完成"} ${lastStrategyGroupId}`;
+        status.style.color = "var(--accent-2)";
+      } catch (error) {
+        status.textContent = `操作失败：${error.message}`;
+        status.style.color = "var(--danger)";
+      }
+    }
+
+    function confirmTrend(direction) {
+      postStrategyAction("/confirm", { direction });
+    }
+
+    function closeCurrentGroup() {
+      postStrategyAction("/close", { reason: "manual_frontend_close" });
+    }
+
+    buildRows();
+    recalcNotional();
+    loadRadarPool().then(() => loadPlan());
+    renderMarketMeta();
+
+    document.querySelectorAll("input, select, textarea").forEach((el) => {
+      const onEdit = () => {
+        const tr = el.closest("tr");
+        if (el.id === "poolSymbol" && el.value) {
+          setInput("symbol", el.value);
+          refreshMarket({ syncOrders: true });
+        } else if (el.id === "symbol") {
+          setInput("symbol", normalizeSymbol(el.value));
+        } else if (el.id === "referencePrice" || el.id === "leverage") {
+          applyPriceFromOffsets();
+        } else if (el.id === "totalNotional" || el.id === "maxLayers" || el.id === "probeNotionalInput" || el.id === "openProbeHedge") {
+          recalcNotional();
+          return;
+        } else if (tr && (el.classList.contains("offset-pct") || el.classList.contains("notional"))) {
+          applyRowPrice(tr);
+        }
+        render();
+      };
+      el.addEventListener("input", onEdit);
+      el.addEventListener("change", onEdit);
+    });
+    document.getElementById("saveBtn").addEventListener("click", savePlan);
+    document.getElementById("loadBtn").addEventListener("click", loadPlan);
+    document.getElementById("exportBtn").addEventListener("click", exportPlan);
+    document.getElementById("importBtn").addEventListener("click", importPlan);
+    document.getElementById("copyBtn").addEventListener("click", copyPlan);
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById("savedAt").textContent = "已清空本地保存";
+      document.getElementById("dirtyText").textContent = "未保存";
+    });
+    document.getElementById("applyDefaultBtn").addEventListener("click", applyDefaultLadder);
+    document.getElementById("backtestTemplateBtn").addEventListener("click", applyBacktestTemplate);
+    document.getElementById("refreshMarketBtn").addEventListener("click", refreshMarket);
+    document.getElementById("startStrategyBtn").addEventListener("click", startStrategy);
+    document.getElementById("confirmLongBtn").addEventListener("click", () => confirmTrend("LONG"));
+    document.getElementById("confirmShortBtn").addEventListener("click", () => confirmTrend("SHORT"));
+    document.getElementById("closeGroupBtn").addEventListener("click", closeCurrentGroup);
+    document.getElementById("recalcBtn").addEventListener("click", recalcNotional);
+  </script>
+</body>
+</html>

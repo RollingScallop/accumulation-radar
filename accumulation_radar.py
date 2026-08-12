@@ -38,6 +38,8 @@ TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN", "")
 TG_CHAT_ID = os.getenv("TG_CHAT_ID", "")
 TG_OBSERVER_CHAT_ID = os.getenv("TG_OBSERVER_CHAT_ID", "")
 ENABLE_TG_PUSH = os.getenv("ENABLE_TG_PUSH", "false").lower() == "true"
+# 观察池报告单独开关：false 时 observe 不发 TG（仅日志），主雷达/收筹池报告不受影响
+ENABLE_OBSERVE_TG_PUSH = os.getenv("ENABLE_OBSERVE_TG_PUSH", "true").lower() == "true"
 AI_TRADER_WEBHOOK_URL = os.getenv("AI_TRADER_WEBHOOK_URL", "http://127.0.0.1:3000/api/webhooks/radar")
 AI_TRADER_WEBHOOK_SECRET = os.getenv("AI_TRADER_WEBHOOK_SECRET", "")
 AI_TRADER_AUTO_EXECUTE = os.getenv("AI_TRADER_AUTO_EXECUTE", "false").lower() == "true"
@@ -1047,7 +1049,11 @@ def run_entry_observer(conn, limit=OBSERVE_MAX_CANDIDATES):
     conn.commit()
 
     if len(report_lines) > 1:
-        send_telegram("\n".join(report_lines[:15]))
+        if ENABLE_OBSERVE_TG_PUSH:
+            send_telegram("\n".join(report_lines[:15]))
+        else:
+            print("\n".join(report_lines[:15]))
+            print("  [TG] 观察池报告静音 (ENABLE_OBSERVE_TG_PUSH=false)")
 
     if ready_signals:
         print(f"  ✅ 观察器触发 {len(ready_signals)} 个最终入场信号")
